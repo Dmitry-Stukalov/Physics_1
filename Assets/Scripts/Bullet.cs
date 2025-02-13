@@ -15,11 +15,8 @@ public class Bullet : MonoBehaviour
 	public float Z { get; set; }
 	public float S { get; set; }
 	public float Vxo { get; set; }
-	public float Vx { get; set; }
 	public float Vyo { get; set; }
-	public float Vy { get; set; }
 	public float Vzo { get; set; }
-	public float Vz { get; set; }
 	public float T { get; set; }
 	public float A { get; set; }
 	public bool IsMoving { get; set; }
@@ -46,11 +43,8 @@ public class Bullet : MonoBehaviour
 		Z = 0;
 		S = 0;
 		Vxo = 0;
-		Vx = 0;
 		Vyo = 0;
-		Vy = 0;
 		Vzo = 0;
-		Vz = 0;
 		T = 0;
 		A = 0;
 
@@ -91,24 +85,12 @@ public class Bullet : MonoBehaviour
 				Vxo = value;
 				break;
 
-			case "Vx":
-				Vx = value;
-				break;
-
 			case "Vyo":
 				Vyo = value;
 				break;
 
-			case "Vy":
-				Vy = value;
-				break;
-
 			case "Vzo":
 				Vzo = value;
-				break;
-
-			case "Vz":
-				Vz = value;
 				break;
 
 			case "A":
@@ -132,15 +114,6 @@ public class Bullet : MonoBehaviour
 			case "Z":
 				return Z;
 
-			case "Vx":
-				return Vx;
-
-			case "Vy":
-				return Vy;
-
-			case "Vz":
-				return Vz;
-
 			case "T":
 				return T;
 
@@ -159,113 +132,44 @@ public class Bullet : MonoBehaviour
 		if (IsMoving)
 		{
 			T += Time.deltaTime;
-
-			if (Vzo != 0)
+			if (A == 0)
 			{
-				if (A == 0)
-				{
-					Vx = Vxo * T;
-					Vy = Vyo * T;
-					Vz = Vzo * T;
-					X = Xo + Vxo * T;
-					Y = Yo + Vyo * T;
-					Z = Zo + Vzo * T;
-
-					targetDirection = new Vector3(X, Y, Z);
-
-					if (targetDirection != Vector3.zero)
-					{
-						Quaternion targetRotation = Quaternion.LookRotation(targetDirection, Vector3.up) * Quaternion.Euler(0, 90, 0);
-						transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-					}
-
-					gameObject.transform.position = new Vector3(X, Y, Z);
-					S = Vector3.Distance(new Vector3(0, 0, 0), gameObject.transform.position);
-				}
-				else
-				{
-					Vx = A * T + Vxo;
-					Vy = A * T + Vyo;
-					X = Xo + Vxo * T + ((A * T * T) / 2);
-					Y = Yo + Vyo * T + ((A * T * T) / 2);
-					Z = Zo + Vzo * T + ((A * T * T) / 2);
-
-					targetDirection = new Vector3(X, Y, Z);
-
-					if (targetDirection != Vector3.zero)
-					{
-						Quaternion targetRotation = Quaternion.LookRotation(targetDirection, Vector3.up) * Quaternion.Euler(0, 90, 0);
-						transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-					}
-
-					gameObject.transform.position = new Vector3(X, Y, Z);
-					S = Vector3.Distance(new Vector3(0, 0, 0), gameObject.transform.position);
-				}
+				X = Xo + Vxo * T;
+				Y = Yo + Vyo * T;
+				Z = Zo + Vzo * T;
+				S = Math.Abs(T * Convert.ToSingle(Math.Sqrt(Vxo * Vxo + Vyo * Vyo + Vzo * Vzo)));
 			}
 			else
 			{
-				if (Vyo != 0)
+				if (Vzo != 0)
 				{
-					if (A == 0)
-					{
-						Vx = Vxo * T;
-						Vy = Vyo * T;
-						X = Xo + Vxo * T;
-						Y = Yo + Vyo * T;
-
-						targetDirection = new Vector3(X, Y, Z);
-
-						if (targetDirection != Vector3.zero)
-						{
-							Quaternion targetRotation = Quaternion.LookRotation(targetDirection, Vector3.up) * Quaternion.Euler(0, 90, 0);
-							transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-						}
-
-						gameObject.transform.position = new Vector3(X, Y, Z);
-						S = Vector3.Distance(new Vector3(0, 0, 0), gameObject.transform.position);
-					}
-					else
-					{
-						Vx = A * T + Vxo;
-						Vy = A * T + Vyo;
-						X = Xo + Vxo * T + ((A * T * T) / 2);
-						Y = Yo + Vyo * T + ((A * T * T) / 2);
-
-						targetDirection = new Vector3(X, Y, Z);
-
-						if (targetDirection != Vector3.zero)
-						{
-							Quaternion targetRotation = Quaternion.LookRotation(targetDirection, Vector3.up) * Quaternion.Euler(0, 90, 0);
-							transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-						}
-
-						gameObject.transform.position = new Vector3(X, Y, Z);
-						S = Vector3.Distance(new Vector3(0, 0, 0), gameObject.transform.position);
-					}
+					X = Xo + Vxo * T + ((A * T * T) / 2);
+					Y = Yo + Vyo * T + ((A * T * T) / 2);
+					Z = Zo + Vzo * T + ((A * T * T) / 2);
+					S = Convert.ToSingle(Math.Sqrt(Math.Pow(Vxo * T + A * T * T / 2, 2) + Math.Pow(Vyo * T + A * T * T / 2, 2) + Math.Pow(Vzo * T + A * T * T / 2, 2)));
+				}
+				else if (Vyo != 0)
+				{
+					X = Xo + Vxo * T + ((A * T * T) / 2);
+					Y = Yo + Vyo * T + ((A * T * T) / 2);
+					S = Convert.ToSingle(Math.Sqrt(Math.Pow(Vxo * T + A * T * T / 2, 2) + Math.Pow(Vyo * T + A * T * T / 2, 2)));
 				}
 				else
 				{
-					if (A == 0)
-					{
-						Vx = Vxo;
-						X = Xo + Vxo * T;
-						S = Vxo * T;
-						gameObject.transform.position = new Vector3(X, Y, Z);
-					}
-					else
-					{
-						Vx = A * T + Vxo;
-						S = Vxo * T + ((A * T * T) / 2);
-						X = Xo + Vxo * T + ((A * T * T) / 2);
-						gameObject.transform.position = new Vector3(X, Y, Z);
-					}
+					X = Xo + Vxo * T + ((A * T * T) / 2);
+					S = Convert.ToSingle(Math.Sqrt(Math.Pow(Vxo * T + A * T * T / 2, 2)));
 				}
 			}
-		}
-	}
 
-	public void ChangeRotation()
-	{
-		
+			targetDirection = new Vector3(X, Y, Z);
+
+			if (targetDirection != Vector3.zero)
+			{
+				Quaternion targetRotation = Quaternion.LookRotation(targetDirection, Vector3.up) * Quaternion.Euler(0, 90, 0);
+				transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+			}
+
+			gameObject.transform.position = new Vector3(X, Y, Z);
+		}
 	}
 }
